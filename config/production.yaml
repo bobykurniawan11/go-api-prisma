@@ -1,0 +1,3 @@
+server.port: ":1111"
+api.secret: "secret"
+token.life: 3600
