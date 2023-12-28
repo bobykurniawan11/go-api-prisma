@@ -68,29 +68,20 @@ func (u AuthController) SignUp(c *gin.Context) {
 	if err := client.Prisma.Connect(); err != nil {
 		panic(err)
 	}
-
-	//get post data
 	var input RegisterUser
-
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(422, gin.H{"error": err.Error()})
 		return
 	}
-
-	//check if email already exist
 	_existingUser, _ := client.User.FindUnique(
 		db.User.Email.Equals(input.Email),
 	).Exec(c)
-
 	if _existingUser != nil {
 		c.JSON(422, gin.H{"error": "Email already exist"})
 		client.Prisma.Disconnect()
 		return
 	}
-
 	hashedPassword, err := utils.HashPassword(input.Password)
-
-	//create user
 	user, err := client.User.CreateOne(
 		db.User.Email.Set(input.Email),
 		db.User.Password.Set(hashedPassword),
@@ -102,18 +93,10 @@ func (u AuthController) SignUp(c *gin.Context) {
 		client.Prisma.Disconnect()
 		return
 	}
-
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": error.Error()})
-	// 	return
-	// }
-
 	token, err := utils.GenerateToken(
 		user.ID,
 	)
-
 	c.JSON(200, gin.H{"token": token})
-
 }
 
 func (u AuthController) UploadAvatar(c *gin.Context) {
